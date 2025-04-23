@@ -1,24 +1,6 @@
 version: 0.2
-
 phases:
-  install:
-    runtime-versions:
-      java: corretto17 # or your runtime
+  pre_build :
     commands:
-      - echo Installing...
-  build:
-    commands:
-      - echo Building your package...
-      - ./build.sh # or mvn package / npm build etc.
-  post_build:
-    commands:
-      - echo Logging into GitHub...
-      - GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id github-pat --query SecretString --output text)
-      - git config --global user.email "ci@yourdomain.com"
-      - git config --global user.name "CI Bot"
-      - git clone https://$GITHUB_TOKEN@github.com/YOUR_ORG/YOUR_REPO.git
-      - cd YOUR_REPO
-      - cp ../build/output.zip ./dist/ # or whatever file(s) you want
-      - git add dist/
-      - git commit -m "Add new build output from CodeBuild"
-      - git push origin main # or whichever branch
+       - echo Copying from CodeCommit repository
+       - echo Copying from branch testtesttest
