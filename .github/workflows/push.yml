@@ -1,5 +1,3 @@
-version: 0.2
-
 name: Hello World
 on: [push]
 jobs:
