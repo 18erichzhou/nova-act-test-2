@@ -20,8 +20,9 @@ phases:
       - git add .
       - git commit -m "Trigger PR from CodeBuild"
       - git push origin $PR_BRANCH
-      - echo Creating a Pull Request using GitHub CLI
+      - echo Authenticating with GitHub CLI
       - echo "$GITHUB_TOKEN" | gh auth login --with-token
+      - echo Creating Pull Request
       - gh pr create --base testtesttest --head $PR_BRANCH --title "CodeBuild Triggered PR" --body "This PR was automatically created by CodeBuild"
 
 env:
