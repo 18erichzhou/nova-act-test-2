@@ -4,8 +4,8 @@ phases:
   pre_build:
     commands:
       - echo Setting up Git configuration
-      - git config --global user.name "18erichzhou"
-      - git config --global user.email "ericzhou3330@gmail.com"
+      - git config --global user.name "CodeBuild bot"
+      - git config --global user.email "codebuildbot@amazon.com"
       - echo Cloning the GitHub repository
       - echo $GITHUB_TOKEN
       - git clone https://$GITHUB_TOKEN@github.com/18erichzhou/nova-act-test-2.git
