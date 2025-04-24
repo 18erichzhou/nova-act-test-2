@@ -1,5 +1,6 @@
 # Nova Act
 
+Oh no! I changed the README!!!!!
 A Python SDK for Amazon Nova Act.
 
 Nova Act is an early research preview of an SDK + model for building agents designed to reliably take actions in web browsers. Building with the SDK enables developers to break down complex workflows into smaller, reliable, commands, add more detail where needed, call APIs, and intersperse direct browser manipulation. Developers can interleave Python code, whether it be tests, breakpoints, asserts, or threadpooling for parallelization. Read more about the announcement: https://labs.amazon.science/blog/nova-act.
@@ -9,10 +10,11 @@ Nova Act is an early research preview of an SDK + model for building agents desi
 
 Amazon Nova Act is an experimental SDK. When using Nova Act, please keep in mind the following:
 
-1. Nova Act may make mistakes. You are responsible for monitoring Nova Act and using it in accordance with our [Acceptable Use Policy](https://www.amazon.com/gp/help/customer/display.html?nodeId=TTFAPMmEqemeDWZaWf). We collect information on interactions with Nova Act, including prompts and screenshots taken while Nova Act is engaged with the browser, in order to provide, develop, and improve our services. You can request to delete your Nova Act data by emailing us at nova-act@amazon.com.
-2. Do not share your API key. Anyone with access to your API key can use it to operate Nova Act under your Amazon account. If you lose your API key or believe someone else may have access to it, contact nova-act@amazon.com to deactivate your key and obtain a new one.
-3. We recommend that you do not provide sensitive information to Nova Act, such as account passwords. Note that if you use sensitive information through Playwright calls, the information could be collected in screenshots if it appears unobstructed on the browser when Nova Act is engaged in completing an action. (See [Entering sensitive information](#entering-sensitive-information) below.)
-4. If you are using our browsing environment defaults, to identify our agent, look for `NovaAct` in the user agent string. If you operate Nova Act in your own browsing environment or customize the user agent, we recommend that you include that same string.
+1. ⚠️ Please be aware that Nova Act may encounter commands in the content it encounters on third party websites. These unauthorized commands, known as prompt injections, may cause the model to make mistakes or act in a manner that differs from user-provided or model instructions. To reduce the risks associated with prompt injections, it is important to monitor Nova Act and limit its operations to websites you trust.
+2. Nova Act may make mistakes. You are responsible for monitoring Nova Act and using it in accordance with our [Acceptable Use Policy](https://www.amazon.com/gp/help/customer/display.html?nodeId=TTFAPMmEqemeDWZaWf). We collect information on interactions with Nova Act, including prompts and screenshots taken while Nova Act is engaged with the browser, in order to provide, develop, and improve our services. You can request to delete your Nova Act data by emailing us at nova-act@amazon.com.
+3. Do not share your API key. Anyone with access to your API key can use it to operate Nova Act under your Amazon account. If you lose your API key or believe someone else may have access to it, contact nova-act@amazon.com to deactivate your key and obtain a new one.
+4. We recommend that you do not provide sensitive information to Nova Act, such as account passwords. Note that if you use sensitive information through Playwright calls, the information could be collected in screenshots if it appears unobstructed on the browser when Nova Act is engaged in completing an action. (See [Entering sensitive information](#entering-sensitive-information) below.)
+5. If you are using our browsing environment defaults, to identify our agent, look for `NovaAct` in the user agent string. If you operate Nova Act in your own browsing environment or customize the user agent, we recommend that you include that same string.
 
 ## Pre-requisites
 
@@ -332,7 +334,7 @@ If the model has trouble finding the search button, you can instruct it to press
 nova.act("search for cats. type enter to initiate the search.")
 ```
 
-### File download
+### File upload and download
 
 You can use playwright to download a file on a web page.
 
@@ -350,13 +352,26 @@ print(f"Downloaded file {download_info.value.path()}")
 download_info.value.save_as("my_downloaded_file")
 ```
 
-Download the current page (e.g. a pdf) that you have navigated to using `act()`:
+To download the current page:
+
+1. If it's HTML, then accessing `nova.page.content()` will give you the rendered DOM. You can save that to a file.
+2. If it is another content type, like a pdf, you can download it using `nova.page.request`:
 
 ```python
 # Download the content using Playwright's request.
 response = nova.page.request.get(nova.page.url)
 with open("downloaded.pdf", "wb") as f:
     f.write(response.body())
+```
+
+To upload a file on a site that uses the `file` `input` type, you can use Playwright's `set_input_files` facility. For a page with a single file upload affordance, the following sample will work but if you need to select among multiple input elements, please see Playwright documentation.
+
+```python
+# This starts the upload but does not block on its completion.
+nova.page.set_input_files('input[type="file"]', upload_filename)
+
+# Use act to wait for the upload completion. MODIFY THIS TO MATCH THE UPLOAD INDICATOR ON YOUR SITE.
+nova.act("wait for the upload spinner to finish")
 ```
 
 ### Picking dates
@@ -466,7 +481,7 @@ nova.page.keyboard.type("hello")
 **Caution: Use `nova.go_to_url` instead of `nova.page.goto`**
 
 The Playwright Page's `goto()` method has a default timeout of 30 seconds, which may cause failures for slow-loading websites. If the page does not finish loading within this time, `goto()` will raise a `TimeoutError`, potentially interrupting your workflow. Additionally, goto() does not always work well with act, as Playwright may consider the page ready before it has fully loaded.
-To address these issues, we have implemented a new function, `go_to_url()`, which provides more reliable navigation. You can use it by calling: `nova.go_to_url(url)` after `nova.start()`
+To address these issues, we have implemented a new function, `go_to_url()`, which provides more reliable navigation. You can use it by calling: `nova.go_to_url(url)` after `nova.start()`. You can also use the `go_to_url_timeout` parameter on `NovaAct` initialization to modify the default max wait time in seconds for the start page load and subsequent `got_to_url()` calls
 
 ## Report a Bug
 Help us improve! If you notice any issues, please let us know by submitting a bug report via nova-act@amazon.com. 
