@@ -11,7 +11,7 @@ phases:
       - git clone https://$GITHUB_TOKEN@github.com/18erichzhou/nova-act-test-2.git
       - cd nova-act-test-2
       - echo Checking out branch testtesttest
-      - git checkout testtesttest
+      - git checkout main
       - echo Creating new PR branch
       - export PR_BRANCH="codebuild-pr-$(date +%s)"
       - git checkout -b $PR_BRANCH
