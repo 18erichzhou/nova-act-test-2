@@ -25,4 +25,4 @@ phases:
 
 env:
   secrets-manager:
-    GITHUB_TOKEN: "GITHUB_TOKEN"
+    GITHUB_TOKEN: "gh_pat_token"
