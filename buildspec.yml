@@ -7,6 +7,7 @@ phases:
       - git config --global user.name "18erichzhou"
       - git config --global user.email "ericzhou3330@gmail.com"
       - echo Cloning the GitHub repository
+      - echo $GITHUB_TOKEN
       - git clone https://$GITHUB_TOKEN@github.com:18erichzhou/nova-act-test-2.git
       - cd nova-act-test-2
       - echo Checking out branch testtesttest
