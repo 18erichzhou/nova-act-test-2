@@ -1,6 +1,28 @@
 version: 0.2
+
 phases:
-  pre_build :
+  pre_build:
     commands:
-       - echo Copying from CodeCommit repository
-       - echo Copying from branch testtesttest
+      - echo Setting up Git configuration
+      - git config --global user.name "18erichzhou"
+      - git config --global user.email "ericzhou3330@gmail.com"
+      - echo Cloning the GitHub repository
+      - git clone https://$GITHUB_TOKEN@github.com:18erichzhou/nova-act-test-2.git
+      - cd nova-act-test-2
+      - echo Checking out branch testtesttest
+      - git checkout testtesttest
+      - echo Creating new PR branch
+      - export PR_BRANCH="codebuild-pr-$(date +%s)"
+      - git checkout -b $PR_BRANCH
+      - echo Making a dummy change
+      - echo "Triggered by CodeBuild" >> triggered.txt
+      - git add .
+      - git commit -m "Trigger PR from CodeBuild"
+      - git push origin $PR_BRANCH
+      - echo Creating a Pull Request using GitHub CLI
+      - gh auth login --with-token <<< "$GITHUB_TOKEN"
+      - gh pr create --base testtesttest --head $PR_BRANCH --title "CodeBuild Triggered PR" --body "This PR was automatically created by CodeBuild"
+
+env:
+  secrets-manager:
+    GITHUB_TOKEN: "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"
