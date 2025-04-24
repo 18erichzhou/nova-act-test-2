@@ -25,4 +25,4 @@ phases:
 
 env:
   secrets-manager:
-    GITHUB_TOKEN: "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"
+    GITHUB_TOKEN: "GITHUB_TOKEN"
