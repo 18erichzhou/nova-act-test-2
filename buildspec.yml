@@ -23,7 +23,7 @@ phases:
       - echo Authenticating with GitHub CLI
       - echo "$GITHUB_TOKEN"
       - echo Creating Pull Request
-      - gh pr create --base testtesttest --head $PR_BRANCH --title "CodeBuild Triggered PR" --body "This PR was automatically created by CodeBuild"
+      - gh pr create --base main --head $PR_BRANCH --title "CodeBuild Triggered PR" --body "This PR was automatically created by CodeBuild"
 
 env:
   secrets-manager:
