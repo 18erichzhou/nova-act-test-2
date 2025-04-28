@@ -1,16 +1,3 @@
-# Copyright 2025 Amazon Inc
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 from __future__ import annotations
 
 import os
@@ -99,10 +86,19 @@ class NovaAct:
         endpoint_name: str = DEFAULT_ENDPOINT_NAME,
         tty: bool = True,
         cdp_endpoint_url: str | None = None,
+        backend_override: str = "prod",  # pragma: internal
         user_agent: str | None = None,
         logs_directory: str | None = None,
         record_video: bool = False,
         go_to_url_timeout: int | None = None,
+        # pragma: internal-start
+        local: bool = None,
+        ngs: bool = None,
+        beta: bool = None,
+        mons: bool = None,
+        extra_http_headers: dict[str, str] | None = None,
+        use_people_planner: bool = False,
+        # pragma: internal-stop
     ):
         """Initialize a client object.
 
@@ -144,6 +140,9 @@ class NovaAct:
             Whether output logs should be formatted for a terminal (true) or file (false)
         cdp_endpoint_url: str, optional
             A CDP endpoint to connect to
+        backend_override: str                                                           # pragma: internal
+            Override the backend. Choices:                                              # pragma: internal
+            {local, product-server-staging, gamma, beta, beta-apigw}                    # pragma: internal
         user_agent: str, optional
             Optionally override the user agent used by playwright.
         logs_directory: str, optional
@@ -154,7 +153,17 @@ class NovaAct:
             Max wait time on initial page load in seconds
         """
 
+        # pragma: internal-start
+        for key, val in [("local", local), ("ngs", ngs), ("beta", beta), ("mons", mons)]:
+            if val is not None:
+                raise ValidationFailed(
+                    f"Keyword argument `{key}` is deprecated. Use `backend_override` instead. "
+                    f"Valid choices: {[e.value for e in Backend]}"
+                )
+        self._use_people_planner = use_people_planner
+        # pragma: internal-stop
         self._backend = Backend.PROD
+        self._backend = Backend(backend_override)  # pragma: internal
         self._backend_info = get_urls_for_backend(self._backend)
 
         extension_path = extension_path or get_default_extension_path()
@@ -242,6 +251,7 @@ class NovaAct:
             screen_height=self.screen_height,
             user_agent=user_agent,
             record_video=bool(record_video and self._logs_directory),
+            extra_http_headers=extra_http_headers,  # pragma: internal
         )
 
         self._dispatcher: ExtensionDispatcher | None = None
@@ -309,6 +319,7 @@ class NovaAct:
             _LOGGER.warning("Attention: Client is already started; to start over, run stop().")
             return
 
+        _LOGGER.debug("Using internal client version")  # pragma: internal
 
         try:
             session_id = str(uuid.uuid4())
@@ -337,6 +348,7 @@ class NovaAct:
                     playwright_manager=self._playwright,
                     extension_version=self._extension_version,
                     session_logs_directory=session_logs_directory,
+                    use_people_planner=self._use_people_planner,  # pragma: internal
                 )
                 set_logging_session(session_id)
             self._dispatcher.wait_for_page_to_settle(go_to_url_timeout=self.go_to_url_timeout)
