@@ -1,16 +1,3 @@
-# Copyright 2025 Amazon Inc
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import time
 import uuid
 from contextlib import nullcontext
@@ -21,6 +8,7 @@ from playwright.sync_api import Error as PlaywrightError
 from retry.api import retry_call
 
 from nova_act.__version__ import VERSION as SDK_VERSION
+from nova_act.impl.backend import LegacyBackendInfo  # pragma: internal
 from nova_act.impl.backend import BackendInfo
 from nova_act.impl.keyboard_event_watcher import KeyboardEventWatcher
 from nova_act.impl.playwright import PlaywrightInstanceManager
@@ -75,15 +63,18 @@ class ExtensionDispatcher:
         session_id: str,
         verbose_errors: bool = False,
         retry: bool = True,
+        use_people_planner: bool = False,  # pragma: internal
     ):
         self._backend_info = backend_info
         self._nova_act_api_key = nova_act_api_key
         self._playwright_manager = playwright_manager
         self._extension_version = extension_version
         self._tty = tty
+        self._use_ngs = not isinstance(self._backend_info, LegacyBackendInfo)  # pragma: internal
         self._session_id = session_id
         self._verbose_errors = verbose_errors
         self._retry = retry
+        self._use_people_planner = use_people_planner  # pragma: internal
 
         self._run_info_compiler = RunInfoCompiler(session_logs_directory) if session_logs_directory else None
 
@@ -107,6 +98,7 @@ class ExtensionDispatcher:
         The extension listens for messages of this type to cancel existing program runs.
 
         """
+        # TODO: support specifying a specific workflow run to cancel? pragma: internal
         cancel_prompt_message = {"type": CANCEL_PROMPT_TYPE}
         encrypted_message = self._playwright_manager.encrypter.encrypt(cancel_prompt_message)
         try:

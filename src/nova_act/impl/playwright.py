@@ -1,16 +1,3 @@
-# Copyright 2025 Amazon Inc
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import os
 from typing import cast
 
@@ -71,6 +58,7 @@ class PlaywrightInstanceManager:
         screen_height: int,
         user_agent: str | None,
         record_video: bool,
+        extra_http_headers: dict[str, str] | None = None,  # pragma: internal
     ):
         self._playwright = maybe_playwright
         self._owns_playwright = maybe_playwright is None  # Tracks if we created an instance
@@ -86,6 +74,7 @@ class PlaywrightInstanceManager:
         self.screen_height = screen_height
         self.user_agent = user_agent
         self._record_video = record_video
+        self._extra_http_headers = extra_http_headers  # pragma: internal
 
         if self._cdp_endpoint_url:
             if self._record_video:
