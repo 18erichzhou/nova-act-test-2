@@ -86,6 +86,7 @@ class ActError(NovaActError):
 class ActServerError(ActError, ABC):
     failed_request_id: str | None = None
 
+
     def __init__(
         self,
         *,
@@ -96,6 +97,7 @@ class ActServerError(ActError, ABC):
     ):
         super().__init__(metadata=metadata, message=message)
         object.__setattr__(self, "failed_request_id", failed_request_id)
+
 
 
 class ActPromptError(ActError, ABC):
@@ -113,6 +115,7 @@ class ActPromptError(ActError, ABC):
 """
 Concrete Errors
 
+ATTENTION: If you add a class here, please remember to expose it for imports in nova_act __init__.py pragma: internal
 """
 
 
