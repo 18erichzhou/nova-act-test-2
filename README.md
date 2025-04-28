@@ -3,10 +3,16 @@
 Oh no! I changed the README!!!!!
 I changed it again!!!!!!!!
 A third time???
+Fourth check...
+Fifth check!
 A Python SDK for Amazon Nova Act.
 
 Nova Act is an early research preview of an SDK + model for building agents designed to reliably take actions in web browsers. Building with the SDK enables developers to break down complex workflows into smaller, reliable, commands, add more detail where needed, call APIs, and intersperse direct browser manipulation. Developers can interleave Python code, whether it be tests, breakpoints, asserts, or threadpooling for parallelization. Read more about the announcement: https://labs.amazon.science/blog/nova-act.
 
+[//]: # (pragma: internal-start)
+For development instructions, see [DEVELOPING.md](./DEVELOPING.md).
+
+[//]: # (pragma: internal-stop)
 
 ## Disclosures
 
@@ -25,6 +31,10 @@ Amazon Nova Act is an experimental SDK. When using Nova Act, please keep in mind
 
 ## Building
 
+[//]: # (pragma: internal-start)
+> **For Amazonians:** The following is for the external github source distribution only! It won't work for the Amazon internal repo.
+
+[//]: # (pragma: internal-stop)
 
 ```sh
 python -m pip install --editable '.[dev]'
@@ -35,6 +45,10 @@ python -m build --wheel --no-isolation --outdir dist/ .
 
 ### Authentication
 
+[//]: # (pragma: internal-start)
+> **For Amazonians:** Visit https://nova-gamma.amazon.com/act and generate an API Key. Note that to get your customer ID, you'll have to be on VPN. You can pass this key into the client either during initialization, or save it as an environment variable.
+
+[//]: # (pragma: internal-stop)
 
 Navigate to https://nova.amazon.com/act and generate an API key.
 
@@ -45,6 +59,10 @@ export NOVA_ACT_API_KEY="your_api_key"
 
 ### Installation
 
+[//]: # (pragma: internal-start)
+**Note: Until launch the following doesn't work**
+
+[//]: # (pragma: internal-stop)
 
 ```bash
 pip install nova-act
@@ -56,6 +74,18 @@ Nova Act works best with Google Chrome but does not have permission to install t
 playwright install chrome
 ```
 
+[//]: # (pragma: internal-start)
+**For now, you can manually download the wheel from the following link**: [external wheel](https://code.amazon.com/packages/AGIAutonomyClientPythonSdkExternal/releases/1.0/latest_artifact?version_set=AGIAutonomyClient/development&flavor=public).
+
+> **For Amazonians**
+>
+> To install the internal version of the client (**Make sure you are on VPN**):
+> 
+> ```bash
+> pip install -i http://54.188.23.197:80 --trusted-host 54.188.23.197 --upgrade amzn-nova-act-internal
+> ```
+
+[//]: # (pragma: internal-stop)
 
 ## Quick Start: ordering a coffee maker on Amazon
 
@@ -287,6 +317,54 @@ print(f"User data dir saved to {user_data_dir=}")
 
 The script is included in the installation: `python -m nova_act.samples.setup_chrome_user_data_dir`.
 
+[//]: # (pragma: internal-start)
+
+#### Run against a locally installed Chrome browser
+
+To be able to actuate Amazon internal websites that require authentication like the AEA extension, you can configure the SDK to use the Chrome browser installed on your machine rather than the one managed by the SDK following the instructions below.
+
+1. Install the latest version of the extension via pip
+2. Open a Chrome browser and navigate to the URL [chrome://extensions/](chrome://extensions/)
+3. On the extensions page, click on the "Load unpacked" button to install the Adept extension.
+  a. Navigate to the installation directory of the SDK Python package - ex. `<virtual-env-directory>/lib/python3.13/site-packages/nova_act/artifacts/chrome-mv3-prod`
+  b. Press "Select"
+  c. You should now see an extension called Adept under All Extensions
+4. Quit all Chrome browser instances
+5. Launch the Chrome browser via the command line. If launched successfully, you'll see a WebSocket URL printed out, ex. `ws://127.0.0.1:9222/devtools/browser/abcdef`
+  a. Mac - `/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args --remote-debugging-port=9222`
+6. Pass in the WebSocket URL as a parameter to the client, ex. `NovaAct(cdp_endpoint_url=<WebSocket URL>)`
+7. Develop your automations script as before and the SDK will actuate against the local Chrome browser
+  a. ** NOTE: you must manually restart the browser if you restart the client
+
+
+Example to launch the Chrome browser with remote debugging enabled
+```
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args --remote-debugging-port=9222
+```
+
+The command above should return a message similar to the one below:
+
+```
+DevTools listening on ws://127.0.0.1:9222/devtools/browser/548f7ce7-de62-4454-9438-dd98a6580f3e
+...
+```
+
+Use the example below to actuate the locally launched Chrome browser:
+
+*Note: Modify the cdp_endpoint_url to the one you received in the command above.*
+
+```
+>>> from nova_act import NovaAct
+>>> nova = NovaAct(cdp_endpoint_url='ws://127.0.0.1:9222/devtools/browser/548f7ce7-de62-4454-9438-dd9\
+8a6580f3e', starting_page="https://www.amazon.com")
+>>> nova.start()
+>>> nova.act('search for a bird')
+...
+>>> nova.stop()
+>>> quit()
+```
+
+[//]: # (pragma: internal-stop)
 
 ### Entering sensitive information
 
@@ -423,6 +501,10 @@ For example:
 
 ## Reference
 
+[//]: # (pragma: internal-start)
+Auto-generated code documentation for this package is available [here](https://code.amazon.com/packages/AGIAutonomyClientPythonSdk/releases/1.0/latest_artifact?version_set=AGIAutonomyClient/development&platform=AL2_x86_64&flavor=private/brazil-documentation/docs/index.html).
+
+[//]: # (pragma: internal-stop)
 
 ### Initializing NovaAct
 
@@ -496,3 +578,13 @@ Your feedback is valuable in ensuring a better experience for everyone.
 
 Thanks for experimenting with Nova Act!
 
+[//]: # (pragma: internal-start)
+**For Amazonians**
+
+*NOTE: If your issue is a known issue that is tracked [here](https://quip-amazon.com/EIqpAaHIDZYX), please +1 or comment on the linked backlog item.*
+
+If you notice any issues or glitches, please let us know by submitting a bug report here - https://tiny.amazon.com/1husc9xe1/taskamazdevtaskcrea
+
+Be sure to include a link to your workflow run on https://internal-tools.autonomy.agi.amazon.dev/workflow-viewer, which will have been printed out as a console log message.
+
+[//]: # (pragma: internal-stop)

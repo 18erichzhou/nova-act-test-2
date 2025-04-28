@@ -1,16 +1,8 @@
-# Copyright 2025 Amazon Inc
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# pragma: internal-start
+"""
+TODO: move this to the inference server after nova_act V0 launch
+"""
+# pragma: internal-stop
 
 import json
 from typing import Any, Dict
@@ -31,6 +23,9 @@ def validate_jsonschema_schema(schema: Dict[str, Any]):
 
 def add_schema_to_prompt(prompt: str, schema: Dict[str, Any]) -> str:
     schema_str: str = json.dumps(schema)
+    # pragma: internal-start
+    # see model_server/rendering/agentification.py in megatron for this template in training
+    # pragma: internal-stop
     return f"{prompt}, format output with jsonschema: {schema_str}"
 
 
