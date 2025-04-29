@@ -99,6 +99,7 @@ class NovaAct:
         endpoint_name: str = DEFAULT_ENDPOINT_NAME,
         tty: bool = True,
         cdp_endpoint_url: str | None = None,
+
         user_agent: str | None = None,
         logs_directory: str | None = None,
         record_video: bool = False,
@@ -144,6 +145,9 @@ class NovaAct:
             Whether output logs should be formatted for a terminal (true) or file (false)
         cdp_endpoint_url: str, optional
             A CDP endpoint to connect to
+
+
+
         user_agent: str, optional
             Optionally override the user agent used by playwright.
         logs_directory: str, optional
@@ -155,6 +159,7 @@ class NovaAct:
         """
 
         self._backend = Backend.PROD
+
         self._backend_info = get_urls_for_backend(self._backend)
 
         extension_path = extension_path or get_default_extension_path()
@@ -242,6 +247,7 @@ class NovaAct:
             screen_height=self.screen_height,
             user_agent=user_agent,
             record_video=bool(record_video and self._logs_directory),
+
         )
 
         self._dispatcher: ExtensionDispatcher | None = None
@@ -310,6 +316,7 @@ class NovaAct:
             return
 
 
+
         try:
             session_id = str(uuid.uuid4())
             set_logging_session(session_id)
@@ -337,6 +344,7 @@ class NovaAct:
                     playwright_manager=self._playwright,
                     extension_version=self._extension_version,
                     session_logs_directory=session_logs_directory,
+
                 )
                 set_logging_session(session_id)
             self._dispatcher.wait_for_page_to_settle(go_to_url_timeout=self.go_to_url_timeout)
