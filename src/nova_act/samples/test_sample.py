@@ -16,31 +16,17 @@ import fire  # type: ignore
 from nova_act import NovaAct
 
 
-def book_tennis_court(date, activity, time_of_day):
-    """
-    Book a court through the SF parks & rec system.
-
-    Args:
-        date (str): Date to book (e.g. "March 19 Wednesday")
-        activity (str): Activity to book (e.g. "Tennis")
-        time_of_day (str): Time of day preference (e.g. "Afternoon")
-    """
-    n = NovaAct(starting_page="https://www.rec.us/sfrecpark")
-    n.start()
-    n.act(f"update the Today selector to be {date} and press Done")
-    n.act(f"update the Activities selector to be {activity} and then press Done")
-    n.act(f"update the Time of day selector to be {time_of_day} and then press done")
-
-    # Find and select latest time slot
-    n.act(
-        "among all the tennis courts shown on the page, find the time slot that is the latest in the day and select it"
+def main(record_video: bool = False) -> None:
+    n = NovaAct(
+        starting_page="https://www.amazon.com",
+        record_video=record_video,
+        backend_override="beta-apigw",
+        nova_act_api_key="S4Q6lgXCCr8yieLdlqGxc7SnPMZmIP7y8YYcZSSu",
     )
-
-    # Book the slot
-    n.act("book the slot you have selected")
-
+    n.start()
+    n.act("Take a screenshot and return it as text using base64 encoding of the screenshot image.")
     n.stop()
 
 
 if __name__ == "__main__":
-    fire.Fire(book_tennis_court)
+    fire.Fire(main)
