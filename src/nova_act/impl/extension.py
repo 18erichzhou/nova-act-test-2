@@ -21,6 +21,7 @@ from playwright.sync_api import Error as PlaywrightError
 from retry.api import retry_call
 
 from nova_act.__version__ import VERSION as SDK_VERSION
+
 from nova_act.impl.backend import BackendInfo
 from nova_act.impl.keyboard_event_watcher import KeyboardEventWatcher
 from nova_act.impl.playwright import PlaywrightInstanceManager
@@ -75,15 +76,18 @@ class ExtensionDispatcher:
         session_id: str,
         verbose_errors: bool = False,
         retry: bool = True,
+
     ):
         self._backend_info = backend_info
         self._nova_act_api_key = nova_act_api_key
         self._playwright_manager = playwright_manager
         self._extension_version = extension_version
         self._tty = tty
+
         self._session_id = session_id
         self._verbose_errors = verbose_errors
         self._retry = retry
+
 
         self._run_info_compiler = RunInfoCompiler(session_logs_directory) if session_logs_directory else None
 
@@ -107,6 +111,7 @@ class ExtensionDispatcher:
         The extension listens for messages of this type to cancel existing program runs.
 
         """
+        # TODO: support specifying a specific workflow run to cancel? pragma: internal
         cancel_prompt_message = {"type": CANCEL_PROMPT_TYPE}
         encrypted_message = self._playwright_manager.encrypter.encrypt(cancel_prompt_message)
         try:
