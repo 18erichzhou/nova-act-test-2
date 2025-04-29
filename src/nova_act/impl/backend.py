@@ -1,22 +1,16 @@
-# Copyright 2025 Amazon Inc
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 from dataclasses import dataclass
 from enum import Enum
 
 
 class Backend(Enum):
     PROD = "prod"
+    # pragma: internal-start
+    LOCAL = "local"
+    PRODUCT_SERVER_STAGING = "product-server-staging"
+    GAMMA = "gamma"
+    BETA = "beta"
+    BETA_APIGW = "beta-apigw"
+    # pragma: internal-stop
 
 
 @dataclass
@@ -25,6 +19,13 @@ class BackendInfo:
     keygen_uri: str
 
 
+# pragma: internal-start
+@dataclass
+class LegacyBackendInfo(BackendInfo):
+    internal_tools_uri: str
+
+
+# pragma: internal-stop
 
 
 URLS_BY_BACKEND = {
@@ -32,6 +33,30 @@ URLS_BY_BACKEND = {
         "https://nova.amazon.com/agent",
         "https://nova.amazon.com/act",
     ),
+    # pragma: internal-start
+    Backend.GAMMA: BackendInfo(
+        "https://nova-preprod.aka.amazon.com/agent",
+        "https://nova-preprod.aka.amazon.com/act",
+    ),
+    Backend.LOCAL: LegacyBackendInfo(
+        "http://localhost:8080",
+        "http://localhost:4444/api-keys",
+        "http://localhost:4444",
+    ),
+    Backend.PRODUCT_SERVER_STAGING: LegacyBackendInfo(
+        "https://product-server-internal.autonomy.agi.amazon.dev",
+        "https://internal-tools.autonomy.agi.amazon.dev/api-keys",
+        "https://internal-tools.autonomy.agi.amazon.dev",
+    ),
+    Backend.BETA_APIGW: BackendInfo(
+        "https://u83po73hf9.execute-api.us-west-2.amazonaws.com/personal",
+        "https://beta.console.harmony.a2z.com/agi-nexus",
+    ),
+    Backend.BETA: BackendInfo(
+        "https://nova-beta.integ.amazon.com/agent",
+        "https://nova-beta.integ.amazon.com/nexus",
+    ),
+    # pragma: internal-stop
 }
 
 

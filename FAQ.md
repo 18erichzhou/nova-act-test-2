@@ -79,3 +79,24 @@ Breaking down your prompt into more discrete steps can help. Higher level reason
 ### Technical Question 14: Is there a way to have Nova Act remember what it did so it could re-use what it learned about the UI?
 You can use the Chrome user data directory to save the session state and restart mid-point.
 
+[//]: # (pragma: internal-start)
+## **Internal Questions** 
+The following are questions only applicable for Amazonians.
+
+### Internal Question 1: I'm outside the US but want to try Nova Act. What should I do?
+Use VPN and select a US-based endpoint (Herndon, VA, US recommended for best performance).
+
+### Internal Question 2: Does "research preview" mean it's not to be used for commercial use cases at this time?
+We encourage you to create a proof of concept for whichever commercial use-cases you find promising, and we'd love to hear about what you end up building! However, given this is a free playground, it is not able to support deployment into actual production use.
+
+### Internal Question 3: Is Nova Act approved for internal/sensitive data use? What is InfoSec guidance?
+Nova Act is rated to handle critical customer data. That being said, we haven't received explicit sign-off from InfoSec for other Amazon teams to use it internally. To be on the safe side, we do not recommend using Nova Act for critical internal use-cases for now.
+
+### Internal Question 4: I have a customer interested in using Nova Act. Can my customer join the Nova Act preview?
+Yes, everybody can join the Nova Act preview. Ask your customer to request sign up following the steps described in Question 1.
+
+### Internal Question 5: Once a developer has developed a prototype using the Nova Act SDK, is there guidance on how they can move these to production?
+If you want to move your workflow to production, please reach out to us by cutting a ticket:
+Internal use cases: [https://taskei.amazon.dev/tasks/create?template=91c575d9-7845-4af5-95e0-23b1ea6cdea0](https://taskei.amazon.dev/tasks/create?template=91c575d9-7845-4af5-95e0-23b1ea6cdea0)
+External use cases: [https://taskei.amazon.dev/tasks/create?template=618595e9-bcf0-4eae-ad35-389da8f9356b](https://taskei.amazon.dev/tasks/create?template=618595e9-bcf0-4eae-ad35-389da8f9356b)
+[//]: # (pragma: internal-stop)

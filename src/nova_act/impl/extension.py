@@ -1,16 +1,3 @@
-# Copyright 2025 Amazon Inc
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import time
 import uuid
 from contextlib import nullcontext
@@ -21,6 +8,7 @@ from playwright.sync_api import Error as PlaywrightError
 from retry.api import retry_call
 
 from nova_act.__version__ import VERSION as SDK_VERSION
+from nova_act.impl.backend import LegacyBackendInfo  # pragma: internal
 from nova_act.impl.backend import BackendInfo
 from nova_act.impl.keyboard_event_watcher import KeyboardEventWatcher
 from nova_act.impl.playwright import PlaywrightInstanceManager
@@ -56,6 +44,30 @@ _LOGGER = setup_logging(__name__)
 _TRACE_LOGGER = make_trace_logger()
 
 
+# pragma: internal-start
+def _log_feedback_link(workflow_id: str, extension_version: str, session_id: str, act_id: str):
+    _TRACE_LOGGER.info(
+        f"\n{get_session_id_prefix()}** Please provide feedback on this act() call here:\n"
+        "https://i.amazon.com/issues/create?template=84353192-c182-49b0-bf85-94031a7a4657"
+        f"&customFields[string][0][id]=workflow_id&customFields[string][0][value]={workflow_id}"
+        f"&customFields[string][1][id]=sdk_version&customFields[string][1][value]={SDK_VERSION}"
+        "&customFields[string][2][id]=extension_version"
+        f"&customFields[string][2][value]={extension_version}"
+        "&customFields[string][3][id]=session_id"
+        f"&customFields[string][3][value]={session_id}"
+        "&customFields[string][4][id]=act_id"
+        f"&customFields[string][4][value]={act_id}"
+        "\n"
+    )
+    return
+
+
+def log_workflow_viewer_and_agent_run_links(workflow_id: str, act_id: str, base_link: str):
+    _TRACE_LOGGER.info(f"\n{get_session_id_prefix()}Workflow: {base_link}/workflow-viewer?page=0&id={workflow_id}")
+    _TRACE_LOGGER.info(f"{get_session_id_prefix()}Agent run: {base_link}/agent-runs?agentRunId={act_id}\n")
+
+
+# pragma: internal-stop
 
 
 class ExtensionDispatcher:
@@ -75,15 +87,18 @@ class ExtensionDispatcher:
         session_id: str,
         verbose_errors: bool = False,
         retry: bool = True,
+        use_people_planner: bool = False,  # pragma: internal
     ):
         self._backend_info = backend_info
         self._nova_act_api_key = nova_act_api_key
         self._playwright_manager = playwright_manager
         self._extension_version = extension_version
         self._tty = tty
+        self._use_ngs = not isinstance(self._backend_info, LegacyBackendInfo)  # pragma: internal
         self._session_id = session_id
         self._verbose_errors = verbose_errors
         self._retry = retry
+        self._use_people_planner = use_people_planner  # pragma: internal
 
         self._run_info_compiler = RunInfoCompiler(session_logs_directory) if session_logs_directory else None
 
@@ -106,7 +121,13 @@ class ExtensionDispatcher:
         Post a message with `type: autonomy-cancel-prompt` within the browser context.
         The extension listens for messages of this type to cancel existing program runs.
 
+        # pragma: internal-start
+        See also:
+        * https://tiny.amazon.com/ihpjdi9l/codeamazpackAGIEblobaab5appl
+        * https://tiny.amazon.com/lo7gagv2/codeamazpackAGIEblob6ddaappl
+        # pragma: internal-stop
         """
+        # TODO: support specifying a specific workflow run to cancel? pragma: internal
         cancel_prompt_message = {"type": CANCEL_PROMPT_TYPE}
         encrypted_message = self._playwright_manager.encrypter.encrypt(cancel_prompt_message)
         try:
@@ -150,6 +171,10 @@ class ExtensionDispatcher:
             "maxTimeout": go_to_url_timeout,
         }
 
+        # pragma: internal-start
+        if not self._use_ngs:
+            request_wait_for_page_state_message["useBedrock"] = False
+        # pragma: internal-stop
 
         encrypted_message = self._playwright_manager.encrypter.encrypt(request_wait_for_page_state_message)
 
@@ -176,6 +201,10 @@ class ExtensionDispatcher:
 
         See also:
         * https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+        # pragma: internal-start
+        * https://tiny.amazon.com/b743hw4x/codeamazpackAGIEblobaab5appl
+        * https://tiny.amazon.com/194kk9ocl/codeamazpackAGIEblobaab5appl
+        # pragma: internal-stop
 
         """
         pending_action_message = {
@@ -188,6 +217,12 @@ class ExtensionDispatcher:
             "sessionId": self._session_id,
             "useBedrock": True,
         }
+        # pragma: internal-start
+        if not self._use_ngs:
+            pending_action_message["useBedrock"] = False
+        if self._use_people_planner:
+            pending_action_message["usePeoplePlanner"] = True
+        # pragma: internal-stop
         if act.max_steps:
             pending_action_message["maxSteps"] = str(act.max_steps)
         if act.model_temperature is not None:
@@ -236,6 +271,10 @@ class ExtensionDispatcher:
             else nullcontext()
         )
 
+        # pragma: internal-start
+        # this must be obtained from server in each act call
+        workflow_run_id = ""
+        # pragma: internal-stop
 
         with kb_cm as watcher:
             # dispatch request to Extension
@@ -261,6 +300,14 @@ class ExtensionDispatcher:
                     scroller.scroll()
 
                 if len(act.steps) > num_steps_observed:
+                    # pragma: internal-start
+                    if not self._use_ngs and num_steps_observed == 0:
+                        workflow_run_id = act.steps[0].model_input.legacy_workflow_run_id
+                        legacy_backend = cast(LegacyBackendInfo, self._backend_info)
+                        log_workflow_viewer_and_agent_run_links(
+                            workflow_run_id, act.id, legacy_backend.internal_tools_uri
+                        )
+                    # pragma: internal-stop
                     for step in act.steps[num_steps_observed:]:
                         model_response = step.model_output.awl_raw_program
                         newline = "\n"
@@ -305,5 +352,14 @@ class ExtensionDispatcher:
             else:
                 output = ActClientError(message="Unhandled act result", metadata=act.metadata)
 
+            # pragma: internal-start
+            _log_feedback_link(workflow_run_id, self._extension_version, self._session_id, act.id)
+
+            # return the workflow_run_id as session_id for Product Server runs
+            if not self._use_ngs:
+                new_metadata = replace(output.metadata, session_id=workflow_run_id)
+                new_output = replace(output, metadata=new_metadata)
+                output = new_output
+            # pragma: internal-stop
 
             return output
