@@ -234,6 +234,7 @@ class ExtensionDispatcher:
         """
         self._playwright_manager.window_message_handler.bind(act)
         _LOGGER.debug(f"SDK version: {SDK_VERSION}")
+        _LOGGER.debug(f"Extension version: {self._extension_version}")
 
         kb_cm: KeyboardEventWatcher | ContextManager[None] = (
             KeyboardEventWatcher(chr(24), "ctrl+x", "stop agent act() call without quitting the browser")
@@ -290,7 +291,8 @@ class ExtensionDispatcher:
                 self.cancel_prompt(act)
 
             if self._run_info_compiler:
-                self._run_info_compiler.compile(act)
+                file_path = self._run_info_compiler.compile(act)
+                _TRACE_LOGGER.info(f"\n{get_session_id_prefix()}** View your act run here: {file_path}\n")
 
             result = act.result
             output: ActResult | ActError
