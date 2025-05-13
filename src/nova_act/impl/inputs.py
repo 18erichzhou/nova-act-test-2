@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import html
 import os
 from urllib.parse import urlparse
 
@@ -20,6 +19,7 @@ from nova_act.types.errors import (
     AuthError,
     InvalidChromeChannel,
     InvalidInputLength,
+    InvalidMaxSteps,
     InvalidPath,
     InvalidScreenResolution,
     InvalidTimeout,
@@ -38,6 +38,8 @@ MIN_SCREEN_SIZE = 600
 MAX_SCREEN_SIZE = 10000
 
 MAX_PARAM_LENGTH = 2048
+
+MAX_STEP_LIMIT = 100
 
 _LOGGER = setup_logging(__name__)
 
@@ -143,6 +145,14 @@ def validate_timeout(timeout: int | None) -> None:
         raise InvalidTimeout(f"Timeout must be between {MIN_TIMEOUT_S} and {MAX_TIMEOUT_S}")
 
 
+def validate_step_limit(max_steps: int | None) -> None:
+    """Validate the max_steps input"""
+    if max_steps is None:
+        return
+    if max_steps >= MAX_STEP_LIMIT:
+        raise InvalidMaxSteps(MAX_STEP_LIMIT)
+
+
 def check_screen_resolution_in_recommended_range(screen_width: int, screen_height: int) -> None:
     # These numbers are +/- 20% of 1920x1080
     in_range = screen_width >= 1536 and screen_width <= 2304 and screen_height >= 864 and screen_height <= 1296
@@ -187,8 +197,7 @@ def validate_url_ssl_certificate(ignore_https_errors: bool, url: str):
     if ignore_https_errors is True:
         return
 
-    if verify_certificate(url) is False:
-        raise ValueError(f"Invalid SSL certificate for {html.escape(url)}")
+    verify_certificate(url)
 
 
 def validate_base_parameters(
